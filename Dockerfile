@@ -38,7 +38,8 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Prisma CLI + schema + generated client, so migrations can run on startup.
-COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+RUN mkdir -p /app/node_modules/.bin \
+    && ln -sf ../prisma/build/index.js /app/node_modules/.bin/prisma
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
