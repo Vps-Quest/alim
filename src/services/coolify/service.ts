@@ -1,3 +1,4 @@
+
 import "server-only";
 import { coolifyFetch } from "./client";
 import {
@@ -22,12 +23,6 @@ import {
   type UpdateApplicationRequest,
 } from "./types";
 
-/**
- * High-level Coolify operations. All HTTP goes through `coolifyFetch`, so the
- * endpoint paths below are the single place to adjust if your Coolify version
- * differs. Mirrors the provisioning service's "singleton object of async
- * methods" shape.
- */
 export const coolifyService = {
   async testConnection(): Promise<CoolifyConnectionResult> {
     try {
@@ -51,7 +46,9 @@ export const coolifyService = {
   },
 
   async getApplication(uuid: string): Promise<CoolifyApplication> {
-    return coolifyFetch<CoolifyApplication>({ path: `/applications/${uuid}` });
+    return coolifyFetch<CoolifyApplication>({
+      path: `/applications/${uuid}`,
+    });
   },
 
   async createApplication(
@@ -76,14 +73,24 @@ export const coolifyService = {
   },
 
   async deploy(uuid: string): Promise<CoolifyDeployResponse> {
-    return coolifyFetch<CoolifyDeployResponse>({ path: "/deploy", query: { uuid } });
+    return coolifyFetch<CoolifyDeployResponse>({
+      path: "/deploy",
+      method: "POST",
+      query: { uuid },
+    });
   },
 
   async listEnvVars(uuid: string): Promise<CoolifyEnvVar[]> {
-    return coolifyFetch<CoolifyEnvVar[]>({ path: `/applications/${uuid}/envs` });
+    return coolifyFetch<CoolifyEnvVar[]>({
+      path: `/applications/${uuid}/envs`,
+    });
   },
 
-  async setEnvVar(uuid: string, key: string, value: string): Promise<void> {
+  async setEnvVar(
+    uuid: string,
+    key: string,
+    value: string,
+  ): Promise<void> {
     await coolifyFetch<void>({
       path: `/applications/${uuid}/envs`,
       method: "POST",
@@ -91,10 +98,6 @@ export const coolifyService = {
     });
   },
 
-  /**
-   * Upsert many env vars in one call. POST /envs 409s when a key already exists
-   * (Coolify auto-creates some on new apps), so replication uses bulk PATCH.
-   */
   async setEnvVarsBulk(
     uuid: string,
     vars: Array<{ key: string; value: string }>,
@@ -115,14 +118,17 @@ export const coolifyService = {
   },
 
   async listSecurityKeys(): Promise<CoolifySecurityKey[]> {
-    return coolifyFetch<CoolifySecurityKey[]>({ path: "/security/keys" });
+    return coolifyFetch<CoolifySecurityKey[]>({
+      path: "/security/keys",
+    });
   },
 
   async listGithubApps(): Promise<CoolifyGithubApp[]> {
-    return coolifyFetch<CoolifyGithubApp[]>({ path: "/github-apps" });
+    return coolifyFetch<CoolifyGithubApp[]>({
+      path: "/github-apps",
+    });
   },
 
-  /** Create an app from a private repo via a Coolify GitHub App (carries auth). */
   async createApplicationPrivateGithubApp(
     req: CreatePrivateGithubAppRequest,
   ): Promise<{ uuid: string }> {
@@ -134,68 +140,92 @@ export const coolifyService = {
   },
 
   async getServer(uuid: string): Promise<CoolifyServer> {
-    return coolifyFetch<CoolifyServer>({ path: `/servers/${uuid}` });
+    return coolifyFetch<CoolifyServer>({
+      path: `/servers/${uuid}`,
+    });
   },
 
   async getProject(uuid: string): Promise<CoolifyProject> {
-    return coolifyFetch<CoolifyProject>({ path: `/projects/${uuid}` });
+    return coolifyFetch<CoolifyProject>({
+      path: `/projects/${uuid}`,
+    });
   },
 
-  async listServerResources(uuid: string): Promise<CoolifyServerResource[]> {
-    return coolifyFetch<CoolifyServerResource[]>({ path: `/servers/${uuid}/resources` });
+  async listServerResources(
+    uuid: string,
+  ): Promise<CoolifyServerResource[]> {
+    return coolifyFetch<CoolifyServerResource[]>({
+      path: `/servers/${uuid}/resources`,
+    });
   },
 
-  async listStorages(uuid: string): Promise<CoolifyStoragesResponse> {
-    return coolifyFetch<CoolifyStoragesResponse>({ path: `/applications/${uuid}/storages` });
+  async listStorages(
+    uuid: string,
+  ): Promise<CoolifyStoragesResponse> {
+    return coolifyFetch<CoolifyStoragesResponse>({
+      path: `/applications/${uuid}/storages`,
+    });
   },
 
-async deploy(uuid: string): Promise<CoolifyDeployResponse> {
-  return coolifyFetch<CoolifyDeployResponse>({
-    path: "/deploy",
-    method: "POST",
-    query: { uuid },
-  });
-},
+  async getDeployment(uuid: string): Promise<CoolifyDeployment> {
+    return coolifyFetch<CoolifyDeployment>({
+      path: `/deployments/${uuid}`,
+    });
+  },
 
   async startApplication(uuid: string): Promise<void> {
-    await coolifyFetch<void>({ path: `/applications/${uuid}/start` });
+    await coolifyFetch<void>({
+      path: `/applications/${uuid}/start`,
+    });
   },
 
   async stopApplication(uuid: string): Promise<void> {
-    await coolifyFetch<void>({ path: `/applications/${uuid}/stop` });
+    await coolifyFetch<void>({
+      path: `/applications/${uuid}/stop`,
+    });
   },
 
   async deleteApplication(uuid: string): Promise<void> {
     await coolifyFetch<void>({
       path: `/applications/${uuid}`,
       method: "DELETE",
-      query: { delete_configurations: true, delete_volumes: false, docker_cleanup: true },
+      query: {
+        delete_configurations: true,
+        delete_volumes: false,
+        docker_cleanup: true,
+      },
     });
   },
 
-  // ── Services (docker-compose) ───────────────────────────────────────────────
+  // Services
 
   async listServices(): Promise<CoolifyService[]> {
     return coolifyFetch<CoolifyService[]>({ path: "/services" });
   },
 
   async getService(uuid: string): Promise<CoolifyService> {
-    return coolifyFetch<CoolifyService>({ path: `/services/${uuid}` });
+    return coolifyFetch<CoolifyService>({
+      path: `/services/${uuid}`,
+    });
   },
 
   async listServiceEnvs(uuid: string): Promise<CoolifyEnvVar[]> {
-    return coolifyFetch<CoolifyEnvVar[]>({ path: `/services/${uuid}/envs` });
+    return coolifyFetch<CoolifyEnvVar[]>({
+      path: `/services/${uuid}/envs`,
+    });
   },
 
-  async listServiceStorages(uuid: string): Promise<CoolifyStoragesResponse> {
-    return coolifyFetch<CoolifyStoragesResponse>({ path: `/services/${uuid}/storages` });
+  async listServiceStorages(
+    uuid: string,
+  ): Promise<CoolifyStoragesResponse> {
+    return coolifyFetch<CoolifyStoragesResponse>({
+      path: `/services/${uuid}/storages`,
+    });
   },
 
-  /**
-   * Create a new docker-compose service. `docker_compose_raw` in the request
-   * must be base64-encoded (confirmed live).
-   */
-  async createService(req: CreateServiceRequest): Promise<CreateServiceResponse> {
+  async createService(
+    req: CreateServiceRequest,
+  ): Promise<CreateServiceResponse> {
     return coolifyFetch<CreateServiceResponse>({
       path: "/services",
       method: "POST",
@@ -204,44 +234,62 @@ async deploy(uuid: string): Promise<CoolifyDeployResponse> {
   },
 
   async startService(uuid: string): Promise<void> {
-    await coolifyFetch<void>({ path: `/services/${uuid}/start` });
+    await coolifyFetch<void>({
+      path: `/services/${uuid}/start`,
+    });
   },
 
   async stopService(uuid: string): Promise<void> {
-    await coolifyFetch<void>({ path: `/services/${uuid}/stop` });
+    await coolifyFetch<void>({
+      path: `/services/${uuid}/stop`,
+    });
   },
 
   async deleteService(uuid: string): Promise<void> {
     await coolifyFetch<void>({
       path: `/services/${uuid}`,
       method: "DELETE",
-      query: { delete_configurations: true, delete_volumes: false },
+      query: {
+        delete_configurations: true,
+        delete_volumes: false,
+      },
     });
   },
 
-  // ── Databases ───────────────────────────────────────────────────────────────
+  // Databases
 
   async listDatabases(): Promise<CoolifyDatabase[]> {
-    return coolifyFetch<CoolifyDatabase[]>({ path: "/databases" });
+    return coolifyFetch<CoolifyDatabase[]>({
+      path: "/databases",
+    });
   },
 
   async getDatabase(uuid: string): Promise<CoolifyDatabase> {
-    return coolifyFetch<CoolifyDatabase>({ path: `/databases/${uuid}` });
+    return coolifyFetch<CoolifyDatabase>({
+      path: `/databases/${uuid}`,
+    });
   },
 
   async startDatabase(uuid: string): Promise<void> {
-    await coolifyFetch<void>({ path: `/databases/${uuid}/start` });
+    await coolifyFetch<void>({
+      path: `/databases/${uuid}/start`,
+    });
   },
 
   async stopDatabase(uuid: string): Promise<void> {
-    await coolifyFetch<void>({ path: `/databases/${uuid}/stop` });
+    await coolifyFetch<void>({
+      path: `/databases/${uuid}/stop`,
+    });
   },
 
   async deleteDatabase(uuid: string): Promise<void> {
     await coolifyFetch<void>({
       path: `/databases/${uuid}`,
       method: "DELETE",
-      query: { delete_configurations: true, delete_volumes: false },
+      query: {
+        delete_configurations: true,
+        delete_volumes: false,
+      },
     });
   },
 };
