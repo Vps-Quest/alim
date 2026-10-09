@@ -1,4 +1,3 @@
-
 import "server-only";
 import { coolifyFetch } from "./client";
 import {
