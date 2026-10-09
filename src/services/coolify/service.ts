@@ -149,9 +149,13 @@ export const coolifyService = {
     return coolifyFetch<CoolifyStoragesResponse>({ path: `/applications/${uuid}/storages` });
   },
 
-  async getDeployment(uuid: string): Promise<CoolifyDeployment> {
-    return coolifyFetch<CoolifyDeployment>({ path: `/deployments/${uuid}` });
-  },
+async deploy(uuid: string): Promise<CoolifyDeployResponse> {
+  return coolifyFetch<CoolifyDeployResponse>({
+    path: "/deploy",
+    method: "POST",
+    query: { uuid },
+  });
+},
 
   async startApplication(uuid: string): Promise<void> {
     await coolifyFetch<void>({ path: `/applications/${uuid}/start` });
